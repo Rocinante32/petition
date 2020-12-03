@@ -1,0 +1,2 @@
+-- SELECT (first,last) FROM signatures;
+-- DELETE FROM signatures;

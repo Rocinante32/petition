@@ -1,11 +1,18 @@
 const express = require("express");
 const app = express();
 const hb = require("express-handlebars");
-const db = require("./db.js");
+const db = require("./db");
 const cookieParser = require("cookie-parser");
 app.engine("handlebars", hb());
 app.set("view engine", "handlebars");
 app.use(cookieParser());
+
+app.use(
+    express.urlencoded({
+        extended: false,
+    })
+);
+
 app.use(express.static("./public"));
 
 app.use((req, res, next) => {
@@ -28,8 +35,8 @@ app.get("/petition", (req, res) => {
 });
 
 app.post("/petition", (req, res) => {
-    console.log(req.params.first);
-    db.addSig("Jiminy", "Cricket", "madeupSig")
+    const { first, last } = req.body;
+    db.addSig(first, last, "madeupSig")
         .then(() => {
             console.log("yay it worked");
             res.cookie("signed", "true");
@@ -59,12 +66,13 @@ app.get("/signers", (req, res) => {
     if (req.cookies.signed != "true") {
         res.redirect("/petition");
     } else {
-        res.render("signers", {
-            layout: "main",
-        });
-        db.getSig()
-            .then((result) => {
-                console.log("result from getSig", result.rows);
+        db.allSigned()
+            .then(({ rows }) => {
+                console.log("results var is: ", rows);
+                res.render("signers", {
+                    rows,
+                    layout: "main",
+                });
             })
             .catch((err) => {
                 console.log("error in db.getSig", err);

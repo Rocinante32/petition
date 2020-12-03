@@ -14,3 +14,8 @@ module.exports.addSig = (firstName, lastName, signature) => {
 
     return db.query(q, params);
 };
+
+module.exports.allSigned = () => {
+    const q = `SELECT (first,last) FROM signatures`;
+    return db.query(q);
+};
