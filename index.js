@@ -36,6 +36,8 @@ app.get("/petition", (req, res) => {
 
 app.post("/petition", (req, res) => {
     const { first, last } = req.body;
+    console.log("req.body log: ", req.body);
+    console.log("first: ", first, " and last: ", last);
     db.addSig(first, last, "madeupSig")
         .then(() => {
             console.log("yay it worked");
