@@ -3,6 +3,8 @@ const app = express();
 const hb = require("express-handlebars");
 const db = require("./db");
 const cookieParser = require("cookie-parser");
+// const cookieSession = require("cookie-session");
+
 app.engine("handlebars", hb());
 app.set("view engine", "handlebars");
 app.use(cookieParser());
@@ -12,6 +14,13 @@ app.use(
         extended: false,
     })
 );
+
+// app.use(
+//     cookieSession({
+//         secret: `Even a bad pizza is a good pizza`,
+//         maxAge: 1000 * 60 * 60 * 24 * 14,
+//     })
+// );
 
 app.use(express.static("./public"));
 
