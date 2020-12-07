@@ -19,3 +19,8 @@ module.exports.allSigned = () => {
     const q = `SELECT * FROM signatures`;
     return db.query(q);
 };
+
+module.exports.numSigned = () => {
+    const q = "SELECT COUNT (*) FROM signatures";
+    return db.query(q);
+};

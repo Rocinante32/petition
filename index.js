@@ -7,7 +7,6 @@ const cookieSession = require("cookie-session");
 app.engine("handlebars", hb());
 app.set("view engine", "handlebars");
 
-
 app.use(
     express.urlencoded({
         extended: false,
@@ -43,14 +42,15 @@ app.get("/petition", (req, res) => {
 });
 
 app.post("/petition", (req, res) => {
-    const { first, last } = req.body;
-    // console.log("req.body log: ", req.body);
+    const { first, last, signature } = req.body;
+    console.log("req.body log: ", req.body);
+    console.log("sig var: ", signature);
     // console.log("first: ", first, " and last: ", last);
-    db.addSig(first, last, "madeupSig")
+    db.addSig(first, last, signature)
         .then(() => {
             console.log("yay it worked");
             req.session.signed = "true";
-            console.log("req.session after setting: ", req.session)
+            console.log("req.session after setting: ", req.session);
             res.redirect("/thanks");
             return;
         })
@@ -66,8 +66,13 @@ app.get("/thanks", (req, res) => {
         res.redirect("/petition");
         return;
     } else {
-        res.render("thanks", {
-            layout: "main",
+        db.numSigned().then((num) => {
+            num = num.rows[0].count;
+            console.log(num);
+            res.render("thanks", {
+                layout: "main",
+                num,
+            });
         });
     }
 });
