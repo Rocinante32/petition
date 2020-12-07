@@ -9,7 +9,7 @@ module.exports.getSig = () => {
 
 module.exports.addSig = (firstName, lastName, signature) => {
     const q = `INSERT INTO signatures (first, last, signature)
-    VALUES ($1, $2, $3)`;
+    VALUES ($1, $2, $3) RETURNING id`;
     const params = [firstName, lastName, signature];
 
     return db.query(q, params);
@@ -23,4 +23,10 @@ module.exports.allSigned = () => {
 module.exports.numSigned = () => {
     const q = "SELECT COUNT (*) FROM signatures";
     return db.query(q);
+};
+
+module.exports.findById = (id) => {
+    const q = "SELECT signature FROM signatures WHERE id = ($1)";
+    const params = [id];
+    return db.query(q, params);
 };

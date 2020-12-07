@@ -3,6 +3,7 @@ const app = express();
 const hb = require("express-handlebars");
 const db = require("./db");
 const cookieSession = require("cookie-session");
+const csurf = require("csurf");
 
 app.engine("handlebars", hb());
 app.set("view engine", "handlebars");
@@ -19,6 +20,14 @@ app.use(
         maxAge: 1000 * 60 * 60 * 24 * 14,
     })
 );
+
+app.use(csurf());
+
+app.use(function (req, res, next) {
+    res.set("x-frame-options", "DENY");
+    res.locals.csrfToken = req.csrfToken();
+    next();
+});
 
 app.use(express.static("./public"));
 
@@ -47,10 +56,12 @@ app.post("/petition", (req, res) => {
     console.log("sig var: ", signature);
     // console.log("first: ", first, " and last: ", last);
     db.addSig(first, last, signature)
-        .then(() => {
+        .then((dbEntry) => {
             console.log("yay it worked");
             req.session.signed = "true";
             console.log("req.session after setting: ", req.session);
+            req.session.id = dbEntry.rows[0].id;
+            console.log("session id: ", req.session.id);
             res.redirect("/thanks");
             return;
         })
@@ -66,14 +77,24 @@ app.get("/thanks", (req, res) => {
         res.redirect("/petition");
         return;
     } else {
-        db.numSigned().then((num) => {
-            num = num.rows[0].count;
-            console.log(num);
-            res.render("thanks", {
-                layout: "main",
-                num,
+        console.log("req session id from /thanks query", req.session.id);
+        db.numSigned()
+            .then((num) => {
+                num = num.rows[0].count;
+                db.findById(req.session.id).then((rows) => {
+                    // console.log("rows: ", rows.rows[0].signature);
+                    const sigImg = rows.rows[0].signature;
+                    res.render("thanks", {
+                        layout: "main",
+                        num,
+                        sigImg,
+                    });
+                });
+                // console.log(num);
+            })
+            .catch((err) => {
+                console.log("error in num signed: ", err);
             });
-        });
     }
 });
 
@@ -84,7 +105,7 @@ app.get("/signers", (req, res) => {
     } else {
         db.allSigned()
             .then(({ rows }) => {
-                console.log("results var is: ", rows);
+                // console.log("results var is: ", rows);
                 res.render("signers", {
                     rows,
                     layout: "main",
