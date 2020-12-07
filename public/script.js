@@ -2,11 +2,17 @@
 const canvas = document.getElementById("signature");
 var ctx = canvas.getContext("2d");
 console.log(canvas);
+ctx.lineJoin = "round";
+ctx.lineCap = "round";
+ctx.strokeStyle = "black";
+ctx.lineWidth = 3;
+
 var draw = false;
 var startX = 0;
 var startY = 0;
 
 canvas.addEventListener("mousedown", (evt) => {
+    evt.stopPropagation();
     startX = evt.x;
     startY = evt.y;
     draw = true;
@@ -19,14 +25,11 @@ canvas.addEventListener("mousedown", (evt) => {
 });
 
 canvas.addEventListener("mousemove", (evt) => {
+    evt.stopPropagation();
     if (draw == true) {
         const x = evt.x;
         const y = evt.y;
 
-        ctx.lineJoin = "round";
-        ctx.lineCap = "round";
-        ctx.strokeStyle = "black";
-        ctx.lineWidth = 3;
         ctx.lineTo(x, y);
         ctx.stroke();
     }
