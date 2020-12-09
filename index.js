@@ -39,19 +39,6 @@ app.use(express.static("./public"));
 //     next();
 // });
 
-app.get("/petition", (req, res) => {
-    console.log("req id var: ", req.session.id);
-    if (req.session.signed == "true") {
-        console.log("redirected as user has signed");
-        res.redirect("/thanks");
-        return;
-    } else {
-        res.render("petition", {
-            layout: "main",
-        });
-    }
-});
-
 app.get("/register", (req, res) => {
     res.render("register", {
         layout: "main",
@@ -66,6 +53,8 @@ app.post("/register", (req, res) => {
             db.addToDb(first, last, email, hash)
                 .then((dbEntry) => {
                     console.log("entry added to DB");
+                    // console.log("db entry added: ", dbEntry);
+                    // console.log("db entry rows: ", dbEntry.rows);
                     req.session.id = dbEntry.rows[0].id;
                     console.log("req id is: ", req.session.id);
                     console.log("hash in / register:", hash);
@@ -90,7 +79,6 @@ app.post("/register", (req, res) => {
                 layout: "main",
                 submitErr,
             });
-            // if sth goes wrong, rerender the login with an error msg
         });
 });
 
@@ -102,52 +90,66 @@ app.get("/login", (req, res) => {
 
 app.post("/login", (req, res) => {
     const { email, password } = req.body;
-    console.log(req.body);
-    console.log("email: ", email, "password: ", password);
     db.findByEmail(email)
         .then((dbEntry) => {
-            console.log(dbEntry);
-        })
-        .then(() => {});
-    // check if the email the user provided exists, and if so SELECT the user's stored hash from the db
-    // once you have that info from the db only then call 'compare'
-    // replace 'userInput' with the plainTxtPw user just provided in login!
-    compare(password, hashFromDb)
-        .then((result) => {
-            // result will be either true or false depending on whether it's a match
-            // if a match, set a cookie with the user's id,
-            // if not a match, rerender the login template with an error msg
+            console.log("pass: ", password, "hash: ", dbEntry.rows[0].password);
+            compare(password, dbEntry.rows[0].password).then((result) => {
+                if (result) {
+                    req.session.id = dbEntry.rows[0].id;
+                    console.log("req id is: ", req.session.id);
+                    res.redirect("/thanks");
+                } else {
+                    res.render("login", {
+                        layout: "main",
+                        error: true,
+                    });
+                }
+            });
         })
         .catch((err) => {
             console.log("error in compare POST /login", err);
-            // we need to rerender the login template with an error msg
+            res.render("login", {
+                layout: "main",
+                error: true,
+            });
         });
+});
+
+app.get("/petition", (req, res) => {
+    console.log("req id var: ", req.session.id);
+    if (req.session.signed == "true") {
+        console.log("redirected as user has signed");
+        res.redirect("/thanks");
+        return;
+    } else {
+        res.render("petition", {
+            layout: "main",
+        });
+    }
 });
 
 app.post("/petition", (req, res) => {
     const { signature } = req.body;
-    console.log("req.body log: ", req.body);
-    console.log("req id var: ", req.session.id);
+    console.log("req.body log from post route: ", req.body);
+    console.log("req id var rom post route: ", req.session.id);
     // console.log("first: ", first, " and last: ", last);
-    db.addSig(signature)
+    db.addSig(signature, req.session.id)
         .then((dbEntry) => {
             console.log("yay it worked");
-            req.session.signed = "true";
-            console.log("req.session after setting: ", req.session);
-            req.session.id = dbEntry.rows[0].id;
-            console.log("session id: ", req.session.id);
-            res.redirect("/thanks");
+            req.session.signId = dbEntry.rows[0].id;
+            console.log("sign id: ", req.session.signId);
             return;
         })
         .catch((err) => {
             console.log("error in db.addSig", err);
-            res.redirect("/petition");
             alert("An error occured please try again");
+            res.redirect("/petition");
         });
+    res.redirect("/thanks");
 });
 
 app.get("/thanks", (req, res) => {
-    if (req.session.signed != "true") {
+    if (!req.session.signId) {
         res.redirect("/petition");
         return;
     } else {
@@ -155,7 +157,7 @@ app.get("/thanks", (req, res) => {
         db.numSigned()
             .then((num) => {
                 num = num.rows[0].count;
-                db.findById(req.session.id).then((rows) => {
+                db.findById(req.session.signId).then((rows) => {
                     // console.log("rows: ", rows.rows[0].signature);
                     const sigImg = rows.rows[0].signature;
                     res.render("thanks", {

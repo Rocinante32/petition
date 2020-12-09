@@ -38,7 +38,7 @@ module.exports.findById = (id) => {
 };
 
 module.exports.findByEmail = (email) => {
-    const q = "SELECT * FROM signatures WHERE email = ($1)";
+    const q = "SELECT * FROM users WHERE email = ($1)";
     const params = [email];
     return db.query(q, params);
 };
