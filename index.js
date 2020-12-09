@@ -39,7 +39,10 @@ app.use(express.static("./public"));
 //     next();
 // });
 
+////////////////////   register routes  ////////////////////
+
 app.get("/register", (req, res) => {
+    console.log("req id is: ", req.session.id);
     res.render("register", {
         layout: "main",
     });
@@ -47,17 +50,12 @@ app.get("/register", (req, res) => {
 
 app.post("/register", (req, res) => {
     const { first, last, email, password } = req.body;
-    // console.log(first, last, email, password);
     hash(password)
         .then((hash) => {
             db.addToDb(first, last, email, hash)
                 .then((dbEntry) => {
                     console.log("entry added to DB");
-                    // console.log("db entry added: ", dbEntry);
-                    // console.log("db entry rows: ", dbEntry.rows);
                     req.session.id = dbEntry.rows[0].id;
-                    console.log("req id is: ", req.session.id);
-                    console.log("hash in / register:", hash);
                     return;
                 })
                 .catch((err) => {
@@ -68,9 +66,7 @@ app.post("/register", (req, res) => {
                         submitErr,
                     });
                 });
-            res.redirect("/petition");
-            // store the user's hashed pw and all the other user info in our database
-            // if sth goes wrong with storing the user info in the database, rerender the register template with an error msg otherwise redirect to /petition
+            res.redirect("/profile");
         })
         .catch((err) => {
             console.log("error in hash POST /register", err);
@@ -82,7 +78,39 @@ app.post("/register", (req, res) => {
         });
 });
 
+////////////////////   profile routes  ///////////////////
+
+app.get("/profile", (req, res) => {
+    console.log("profile signId: ", req.session.id);
+    res.render("profile", {
+        layout: "main",
+    });
+});
+
+app.post("/profile", (req, res) => {
+    const { age, city, url } = req.body;
+    console.log(req.body);
+    if (url.includes("https://") || url.includes("http://")) {
+        db.addProfile(age, city, url, req.session.id)
+            .then(() => {
+                console.log("profile info added to db");
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+    } else {
+        console.log("url not valid");
+        res.render("profile", {
+            layout: "main",
+        });
+    }
+    res.redirect("/thanks");
+});
+
+////////////////////   login routes  ////////////////////
+
 app.get("/login", (req, res) => {
+    console.log("req sign id is: ", req.session.signId);
     res.render("login", {
         layout: "main",
     });
@@ -92,7 +120,6 @@ app.post("/login", (req, res) => {
     const { email, password } = req.body;
     db.findByEmail(email)
         .then((dbEntry) => {
-            console.log("pass: ", password, "hash: ", dbEntry.rows[0].password);
             compare(password, dbEntry.rows[0].password).then((result) => {
                 if (result) {
                     req.session.id = dbEntry.rows[0].id;
@@ -115,9 +142,11 @@ app.post("/login", (req, res) => {
         });
 });
 
+////////////////////   petition routes  ///////////////////
+
 app.get("/petition", (req, res) => {
     console.log("req id var: ", req.session.id);
-    if (req.session.signed == "true") {
+    if (req.session.signId) {
         console.log("redirected as user has signed");
         res.redirect("/thanks");
         return;
@@ -130,35 +159,33 @@ app.get("/petition", (req, res) => {
 
 app.post("/petition", (req, res) => {
     const { signature } = req.body;
-    console.log("req.body log from post route: ", req.body);
-    console.log("req id var rom post route: ", req.session.id);
-    // console.log("first: ", first, " and last: ", last);
     db.addSig(signature, req.session.id)
         .then((dbEntry) => {
-            console.log("yay it worked");
+            console.log("signature added to the db");
             req.session.signId = dbEntry.rows[0].id;
             console.log("sign id: ", req.session.signId);
             return;
         })
         .catch((err) => {
             console.log("error in db.addSig", err);
-            alert("An error occured please try again");
             res.redirect("/petition");
         });
     res.redirect("/thanks");
 });
 
+////////////////////   thanks route  ///////////////////
+
 app.get("/thanks", (req, res) => {
     if (!req.session.signId) {
+        console.log("redirect from /thanks");
         res.redirect("/petition");
         return;
     } else {
-        console.log("req session id from /thanks query", req.session.id);
+        // console.log("req session id from /thanks query", req.session.id);
         db.numSigned()
             .then((num) => {
                 num = num.rows[0].count;
                 db.findById(req.session.signId).then((rows) => {
-                    // console.log("rows: ", rows.rows[0].signature);
                     const sigImg = rows.rows[0].signature;
                     res.render("thanks", {
                         layout: "main",
@@ -166,7 +193,6 @@ app.get("/thanks", (req, res) => {
                         sigImg,
                     });
                 });
-                // console.log(num);
             })
             .catch((err) => {
                 console.log("error in num signed: ", err);
@@ -174,9 +200,10 @@ app.get("/thanks", (req, res) => {
     }
 });
 
-// //////from class submitting a db query
+////////////////////   signers route  ///////////////////
+
 app.get("/signers", (req, res) => {
-    if (req.session.signed != "true") {
+    if (typeof req.session.signId != "number") {
         res.redirect("/petition");
     } else {
         db.allSigned()
@@ -191,6 +218,14 @@ app.get("/signers", (req, res) => {
                 console.log("error in db.getSig", err);
             });
     }
+});
+
+////////////////////   redirect route  ///////////////////
+
+app.get("/", (req, res) => {
+    res.render("register", {
+        layout: "main",
+    });
 });
 
 app.listen(process.env.PORT || 8080, () => console.log("Server Listening!"));
