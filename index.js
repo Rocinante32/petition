@@ -193,4 +193,4 @@ app.get("/signers", (req, res) => {
     }
 });
 
-app.listen(8080, () => console.log("petition server running on port 8080"));
+app.listen(process.env.PORT || 8080, () => console.log("Server Listening!"));
