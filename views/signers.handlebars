@@ -1,5 +1,5 @@
 <h1>This is the signers page</h1>
-
-    {{#rows}}
-    <li>{{first}} {{last}}</li>
-    {{/rows}}
+<h2>Below are the people have signed our petition so far.</h2>
+{{#rows}}
+    <li>{{first}} {{last}} {{age}} <a href="signers/{{city}}">{{city}}</a> </li>
+{{/rows}}

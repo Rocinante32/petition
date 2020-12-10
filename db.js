@@ -32,7 +32,11 @@ module.exports.addProfile = (age, city, url, user_id) => {
 };
 
 module.exports.allSigned = () => {
-    const q = `SELECT * FROM signatures`;
+    const q = `SELECT users.first, users.last, user_profiles.age, user_profiles.city, user_profiles.url
+               FROM users
+               LEFT JOIN user_profiles ON users.id = user_profiles.user_id
+               JOIN signatures
+               ON users.id = signatures.user_id;`;
     return db.query(q);
 };
 
@@ -52,3 +56,15 @@ module.exports.findByEmail = (email) => {
     const params = [email];
     return db.query(q, params);
 };
+
+module.exports.findUsersByCity = (city) => {
+    const q = `SELECT users.first, users.last, user_profiles.age, user_profiles.url
+            FROM users
+            LEFT JOIN user_profiles ON users.id = user_profiles.user_id
+            JOIN signatures 
+            ON users.id = signatures.user_id
+            WHERE city = ($1)`
+    const params = [city];
+    return db.query(q, params);
+};
+
