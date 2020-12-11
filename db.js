@@ -63,8 +63,7 @@ module.exports.findUsersByCity = (city) => {
             LEFT JOIN user_profiles ON users.id = user_profiles.user_id
             JOIN signatures 
             ON users.id = signatures.user_id
-            WHERE city = ($1)`
+            WHERE city = ($1)`;
     const params = [city];
     return db.query(q, params);
 };
-

@@ -90,7 +90,7 @@ app.get("/profile", (req, res) => {
 app.post("/profile", (req, res) => {
     const { age, city, url } = req.body;
     console.log(req.body);
-    if (url.includes("https://") || url.includes("http://") || url ==``) {
+    if (url.includes("https://") || url.includes("http://") || url == ``) {
         db.addProfile(age, city, url, req.session.id)
             .then(() => {
                 console.log("profile info added to db");
@@ -103,9 +103,22 @@ app.post("/profile", (req, res) => {
         res.render("profile", {
             layout: "main",
         });
-        return
+        return;
     }
     res.redirect("/thanks");
+});
+
+////////////////////   edit routes  ///////////////////
+
+app.get("/profile/edit", (req, res) => {
+    console.log("profile signId: ", req.session.id);
+    console.log("profile edit route!!");
+    db.editProfileInfo(req.session.id).then((info) => {
+        console.log("info: ", info);
+    });
+    res.render("edit", {
+        layout: "main",
+    });
 });
 
 ////////////////////   login routes  ////////////////////
@@ -223,19 +236,20 @@ app.get("/signers", (req, res) => {
 
 app.get("/signers/:city", (req, res) => {
     const { city } = req.params;
-    db.findUsersByCity(city).then(({rows}) => {
-        console.log("db entry: ", rows)
-        // const{ rows } = rows.rows;
-        // console.log("first: ", first, "age: ", age)
-        res.render("signers", {
-        layout: "main",
-        rows
-    });
-    }).catch((err) => {
-        console.log(err)
-    })
+    db.findUsersByCity(city)
+        .then(({ rows }) => {
+            console.log("db entry: ", rows);
+            // const{ rows } = rows.rows;
+            // console.log("first: ", first, "age: ", age)
+            res.render("signers", {
+                layout: "main",
+                rows,
+            });
+        })
+        .catch((err) => {
+            console.log(err);
+        });
 });
-
 
 ////////////////////   redirect route  ///////////////////
 
