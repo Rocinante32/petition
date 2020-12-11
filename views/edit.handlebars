@@ -1,0 +1,19 @@
+<form method="POST">
+    <p>First name</p>
+    <input type="text" value="{{first}}" name="first" label="" placeholder="first name">
+    <p>Last name</p>
+    <input type="text" value="{{last}}" name="last" placeholder="last name">
+    <p>email</p>
+    <input type="text" value="{{email}}" name="email" placeholder="email address">
+    <p>Password</p>
+    <input type="password"  name="password" placeholder="password">
+    <p>Age</p>
+    <input type="text" value="{{age}}" name="age" placeholder="age">
+    <p>City</p>
+    <input type="text" value="{{city}}" name="city" placeholder="city">
+    <p>URL</p>
+    <input type="text" name="url" placeholder="url">
+
+    <input type="hidden" name="_csrf" value="{{csrfToken}}">
+    <button>Submit</button>
+</form>

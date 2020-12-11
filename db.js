@@ -67,3 +67,12 @@ module.exports.findUsersByCity = (city) => {
     const params = [city];
     return db.query(q, params);
 };
+
+module.exports.editProfileInfo = (userId) => {
+    const q = `SELECT users.first, users.last, users.email, user_profiles.age, user_profiles.city, user_profiles.url
+                FROM users
+                JOIN user_profiles ON users.id = user_profiles.user_id
+                WHERE users.id = ($1)`;
+    const params = [userId];
+    return db.query(q, params);
+};
