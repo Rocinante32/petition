@@ -97,7 +97,7 @@ module.exports.updateUserProfile = (age, city, url, userId) => {
     const q = `INSERT INTO user_profiles (age, city, url, user_id)
                 VALUES ($1, $2, $3, $4)
                 ON CONFLICT (user_id)
-                DO UPDATE SET age = $1, city = $2, url = $3, user_id = $4;`;
+                DO UPDATE SET age = $1, city = $2, url = $3 WHERE user_profiles.user_id = $4`;
     const params = [age || null, city || null, url || null, userId];
     return db.query(q, params);
 };

@@ -149,7 +149,7 @@ app.post("/profile/edit", (req, res) => {
                             );
                             db.updateUserProfile(age, city, url, req.session.id)
                                 .then(() => {
-                                    console.log("profile updated: ", req.body);
+                                    console.log("profile updated");
                                 })
                                 .catch((err) => {
                                     console.log(err);
@@ -171,6 +171,14 @@ app.post("/profile/edit", (req, res) => {
         db.updateUserNoPw(first, last, email, req.session.id)
             .then(() => {
                 console.log("user updated without new password");
+                db.updateUserProfile(age, city, url, req.session.id)
+                    .then(() => {
+                        console.log("profile updated");
+                        res.redirect("/thanks");
+                    })
+                    .catch((err) => {
+                        console.log(err);
+                    });
             })
             .catch((err) => {
                 console.log(err);
