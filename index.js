@@ -90,8 +90,13 @@ app.get("/profile", (req, res) => {
 app.post("/profile", (req, res) => {
     const { age, city, url } = req.body;
     console.log(req.body);
-    if (url.includes("https://") || url.includes("http://") || url == ``) {
-        db.addProfile(age, city, url, req.session.id)
+    if (url.startsWith("https://") || url.startsWith("http://") || url == ``) {
+        db.addProfile(
+            age,
+            city.toLowerCase(),
+            url.toLowerCase(),
+            req.session.id
+        )
             .then(() => {
                 console.log("profile info added to db");
             })
@@ -111,14 +116,66 @@ app.post("/profile", (req, res) => {
 ////////////////////   edit routes  ///////////////////
 
 app.get("/profile/edit", (req, res) => {
-    console.log("profile signId: ", req.session.id);
-    console.log("profile edit route!!");
-    db.editProfileInfo(req.session.id).then((info) => {
-        console.log("info: ", info);
+    // console.log("profile signId: ", req.session.id);
+    // console.log("profile edit route!!");
+    db.editProfileInfo(req.session.id).then(({ rows }) => {
+        // console.log("info: ", rows);
+        res.render("edit", {
+            layout: "main",
+            rows,
+        });
     });
-    res.render("edit", {
-        layout: "main",
-    });
+});
+
+app.post("/profile/edit", (req, res) => {
+    const { first, last, email, password, age, city, url } = req.body;
+    // console.log(first, last);
+    if (password) {
+        console.log("new pass submitted");
+        hash(password)
+            .then((hash) => {
+                if (
+                    url.startsWith("https://") ||
+                    url.startsWith("http://") ||
+                    url == ``
+                ) {
+                    console.log("url acceptable");
+                    db.updateUser(first, last, email, hash, req.session.id)
+                        .then(() => {
+                            console.log("user updated");
+                            console.log(
+                                "id from update prof: ",
+                                req.session.id
+                            );
+                            db.updateUserProfile(age, city, url, req.session.id)
+                                .then(() => {
+                                    console.log("profile updated: ", req.body);
+                                })
+                                .catch((err) => {
+                                    console.log(err);
+                                });
+                            res.redirect("/thanks");
+                        })
+                        .catch((err) => {
+                            console.log(err);
+                        });
+                } else {
+                    console.log("url not acceptable");
+                }
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+    } else {
+        console.log("no pass submitted");
+        db.updateUserNoPw(first, last, email, req.session.id)
+            .then(() => {
+                console.log("user updated without new password");
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+    }
 });
 
 ////////////////////   login routes  ////////////////////

@@ -76,3 +76,28 @@ module.exports.editProfileInfo = (userId) => {
     const params = [userId];
     return db.query(q, params);
 };
+
+module.exports.updateUser = (first, last, email, hashedPw, userId) => {
+    const q = `UPDATE users 
+                SET first= $1, last= $2, email= $3 , password= $4
+                WHERE id = $5`;
+    const params = [first, last, email, hashedPw, userId];
+    return db.query(q, params);
+};
+
+module.exports.updateUserNoPw = (first, last, email, userId) => {
+    const q = `UPDATE users 
+                SET first= $1, last= $2, email= $3
+                WHERE id = $4`;
+    const params = [first, last, email, userId];
+    return db.query(q, params);
+};
+
+module.exports.updateUserProfile = (age, city, url, userId) => {
+    const q = `INSERT INTO user_profiles (age, city, url, user_id)
+                VALUES ($1, $2, $3, $4)
+                ON CONFLICT (user_id)
+                DO UPDATE SET age = $1, city = $2, url = $3, user_id = $4;`;
+    const params = [age || null, city || null, url || null, userId];
+    return db.query(q, params);
+};
