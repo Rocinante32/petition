@@ -15,13 +15,19 @@
             <a href="/"><p id="title"><span id="title-text">Save</span>Späti Sundays</p></a>
         </div>
         <div id="menu">
-            {{!-- <a href="/petition"><p>PETITION</p></a> --}}
-            {{!-- <a href="/signers"><p>SIGNERS</p></a> --}}
-            <a href="/login"><p>LOGIN</p></a>
-            <a href="/register"><p>REGISTER</p></a>
+            {{#if loggedIn}}
+                <a href="/profile/edit"><p>PROFILE</p></a>
+                <a href="/petition"><p>PETITION</p></a>
+                <a href="/logout"><p>LOGOUT</p></a>
+            {{else}}
+                <a href="/login"><p>LOGIN</p></a>
+                <a href="/register"><p>REGISTER</p></a>
+            {{/if}}
         </div>
     </div>
     {{{body}}}
-    <footer>©2020 Petitioners</footer>
+    {{#if homePage}}
+    <footer>©2020 Disclaimer: This petition was sponsored by my local späti in return for free beer</footer>
+    {{/if}}
 </body>
 </html>

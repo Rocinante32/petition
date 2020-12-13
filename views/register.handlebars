@@ -1,4 +1,5 @@
 <form method="POST" class="form">
+    {{#if submitErr}}<p>An error occured please try again</p>{{/if}}
     <input type="text" class="inputFields" name="first" placeholder="first name" required>
     <br>
     <input type="text" class="inputFields" name="last" placeholder="last name" required>

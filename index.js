@@ -5,6 +5,7 @@ const db = require("./db");
 const cookieSession = require("cookie-session");
 const csurf = require("csurf");
 const { hash, compare } = require("./bc");
+const { requireLoggedOutUser, requireLoggedInUser } = require("./middleware");
 
 app.engine("handlebars", hb());
 app.set("view engine", "handlebars");
@@ -32,23 +33,16 @@ app.use(function (req, res, next) {
 
 app.use(express.static("./public"));
 
-// app.use((req, res, next) => {
-//     console.log("-----------------");
-//     console.log(`${req.method} request coming in on route ${req.url}`);
-//     console.log("-----------------");
-//     next();
-// });
-
 ////////////////////   register routes  ////////////////////
 
-app.get("/register", (req, res) => {
+app.get("/register", requireLoggedOutUser, (req, res) => {
     console.log("req id is: ", req.session.id);
     res.render("register", {
         layout: "main",
     });
 });
 
-app.post("/register", (req, res) => {
+app.post("/register", requireLoggedOutUser, (req, res) => {
     const { first, last, email, password } = req.body;
     hash(password)
         .then((hash) => {
@@ -56,6 +50,7 @@ app.post("/register", (req, res) => {
                 .then((dbEntry) => {
                     console.log("entry added to DB");
                     req.session.id = dbEntry.rows[0].id;
+                    res.redirect("/profile");
                     return;
                 })
                 .catch((err) => {
@@ -66,7 +61,6 @@ app.post("/register", (req, res) => {
                         submitErr,
                     });
                 });
-            res.redirect("/profile");
         })
         .catch((err) => {
             console.log("error in hash POST /register", err);
@@ -80,14 +74,17 @@ app.post("/register", (req, res) => {
 
 ////////////////////   profile routes  ///////////////////
 
-app.get("/profile", (req, res) => {
+app.get("/profile", requireLoggedInUser, (req, res) => {
     console.log("profile id: ", req.session.id);
-    res.render("profile", {
-        layout: "main",
-    });
+    if (req.session.id) {
+        res.render("profile", {
+            layout: "main",
+            loggedIn: true,
+        });
+    }
 });
 
-app.post("/profile", (req, res) => {
+app.post("/profile", requireLoggedInUser, (req, res) => {
     const { age, city, url } = req.body;
     console.log(req.body);
     if (url.startsWith("https://") || url.startsWith("http://") || url == ``) {
@@ -99,6 +96,8 @@ app.post("/profile", (req, res) => {
         )
             .then(() => {
                 console.log("profile info added to db");
+                res.redirect("/thanks");
+                return;
             })
             .catch((err) => {
                 console.log(err);
@@ -107,15 +106,15 @@ app.post("/profile", (req, res) => {
         console.log("url not valid");
         res.render("profile", {
             layout: "main",
+            loggedIn: true,
         });
         return;
     }
-    res.redirect("/thanks");
 });
 
 ////////////////////   edit routes  ///////////////////
 
-app.get("/profile/edit", (req, res) => {
+app.get("/profile/edit", requireLoggedInUser, (req, res) => {
     console.log("profile id: ", req.session.id);
     console.log("profile edit route!!");
     db.editProfileInfo(req.session.id).then(({ rows }) => {
@@ -123,11 +122,12 @@ app.get("/profile/edit", (req, res) => {
         res.render("edit", {
             layout: "main",
             rows,
+            loggedIn: true,
         });
     });
 });
 
-app.post("/profile/edit", (req, res) => {
+app.post("/profile/edit", requireLoggedInUser, (req, res) => {
     const { first, last, email, password, age, city, url } = req.body;
     // console.log(first, last);
     if (password) {
@@ -193,14 +193,14 @@ app.post("/profile/edit", (req, res) => {
 
 ////////////////////   login routes  ////////////////////
 
-app.get("/login", (req, res) => {
+app.get("/login", requireLoggedOutUser, (req, res) => {
     console.log("req sign id is: ", req.session.signed);
     res.render("login", {
         layout: "main",
     });
 });
 
-app.post("/login", (req, res) => {
+app.post("/login", requireLoggedOutUser, (req, res) => {
     const { email, password } = req.body;
     db.findByEmail(email)
         .then((dbEntry) => {
@@ -228,21 +228,21 @@ app.post("/login", (req, res) => {
 
 ////////////////////   petition routes  ///////////////////
 
-app.get("/petition", (req, res) => {
+app.get("/petition", requireLoggedInUser, (req, res) => {
     console.log("is signed: : ", req.session.signed);
-
     if (req.session.signed) {
         console.log("redirected as user has signed");
-        // res.redirect("/thanks");
+        res.redirect("/thanks");
         return;
     } else {
         res.render("petition", {
             layout: "main",
+            loggedIn: true,
         });
     }
 });
 
-app.post("/petition", (req, res) => {
+app.post("/petition", requireLoggedInUser, (req, res) => {
     const { signature } = req.body;
     db.addSig(signature, req.session.id)
         .then(() => {
@@ -259,22 +259,24 @@ app.post("/petition", (req, res) => {
 
 ////////////////////   thanks route  ///////////////////
 
-app.get("/thanks", (req, res) => {
+app.get("/thanks", requireLoggedInUser, (req, res) => {
     console.log(
         "signed petition is at the get req for thanks : ",
         req.session.signed
     );
-    if (req.session.signed) {
+    if (req.session.signed && req.session.id) {
         db.numSigned()
             .then((num) => {
                 num = num.rows[0].count;
                 db.findById(req.session.id)
                     .then((rows) => {
+                        console.log("hitting then in findbyid: ", rows);
                         const sigImg = rows.rows[0].signature;
                         res.render("thanks", {
                             layout: "main",
                             num,
                             sigImg,
+                            loggedIn: true,
                         });
                     })
                     .catch((err) => {
@@ -292,7 +294,7 @@ app.get("/thanks", (req, res) => {
     }
 });
 
-app.post("/thanks", (req, res) => {
+app.post("/thanks", requireLoggedInUser, (req, res) => {
     console.log("post req to remove sig received");
     console.log("signed true?: ", req.session.signed);
     db.removeSig(req.session.id)
@@ -309,7 +311,7 @@ app.post("/thanks", (req, res) => {
 
 ////////////////////   signers route  ///////////////////
 
-app.get("/signers", (req, res) => {
+app.get("/signers", requireLoggedInUser, (req, res) => {
     if (!req.session.signed) {
         res.redirect("/petition");
     } else {
@@ -319,6 +321,7 @@ app.get("/signers", (req, res) => {
                 res.render("signers", {
                     rows,
                     layout: "main",
+                    loggedIn: true,
                 });
             })
             .catch((err) => {
@@ -327,7 +330,7 @@ app.get("/signers", (req, res) => {
     }
 });
 
-app.get("/signers/:city", (req, res) => {
+app.get("/signers/:city", requireLoggedInUser, (req, res) => {
     const { city } = req.params;
     db.findUsersByCity(city)
         .then(({ rows }) => {
@@ -337,6 +340,9 @@ app.get("/signers/:city", (req, res) => {
             res.render("signers", {
                 layout: "main",
                 rows,
+                loggedIn: true,
+                cityPage: true,
+                city,
             });
         })
         .catch((err) => {
@@ -347,8 +353,28 @@ app.get("/signers/:city", (req, res) => {
 ////////////////////   redirect route  ///////////////////
 
 app.get("/", (req, res) => {
+    if (req.session.id) {
+        res.render("home", {
+            layout: "main",
+            loggedIn: true,
+            homePage: true,
+        });
+    } else {
+        res.render("home", {
+            layout: "main",
+            homePage: true,
+        });
+    }
+});
+
+////////////////////   logout route  ///////////////////
+
+app.get("/logout", requireLoggedInUser, (req, res) => {
+    req.session.id = null;
+    console.log(req.session);
     res.render("home", {
         layout: "main",
+        homePage: true,
     });
 });
 
