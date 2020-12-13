@@ -1,7 +1,9 @@
-<form method="POST">
+<div class="form" >
+    <form method="POST">
     {{#if error}}<p>An error occured please try again</p>{{/if}}
-    <input type="text" name="email" placeholder="email address" required>
-    <input type="password" name="password" placeholder="password" required>
+    <input class="inputFields" type="text" name="email" placeholder="email address" required>
+    <input class="inputFields" type="password" name="password" placeholder="password" required>
     <input type="hidden" name="_csrf" value="{{csrfToken}}">
-    <button>Submit</button>
-</form>
+    <button class="button">Submit</button>
+    </form>
+</div>

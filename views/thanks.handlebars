@@ -1,4 +1,11 @@
-<h1>Thanks for signing our petition</h1>
-<img src="{{sigImg}}" alt="signature">
-<h2>To see a list of people who have already signed click <a href="/signers">here</a></h2>
-<h3>{{num}} people have signed this petition so far.</h3>
+<div class="center-text">
+    <h1>Thanks for signing our petition</h1>
+    <img src="{{sigImg}}" alt="signature">
+    <form method="POST">
+        <input type="hidden" name="_csrf" value="{{csrfToken}}">
+        <button  class="button">Remove signature</button>
+    </form>
+    <h2>To see a list of people who have already signed click <a href="/signers">here</a></h2>
+    <h3>{{num}} people have signed this petition so far.</h3>
+</div>
+

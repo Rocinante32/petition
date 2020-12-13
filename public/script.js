@@ -10,7 +10,7 @@ const canvasPosTop = canvas.offsetTop;
 
 ctx.lineJoin = "round";
 ctx.lineCap = "round";
-ctx.strokeStyle = "black";
+ctx.strokeStyle = "white";
 ctx.lineWidth = 3;
 
 var draw = false;

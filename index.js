@@ -81,7 +81,7 @@ app.post("/register", (req, res) => {
 ////////////////////   profile routes  ///////////////////
 
 app.get("/profile", (req, res) => {
-    console.log("profile signId: ", req.session.id);
+    console.log("profile id: ", req.session.id);
     res.render("profile", {
         layout: "main",
     });
@@ -116,8 +116,8 @@ app.post("/profile", (req, res) => {
 ////////////////////   edit routes  ///////////////////
 
 app.get("/profile/edit", (req, res) => {
-    // console.log("profile signId: ", req.session.id);
-    // console.log("profile edit route!!");
+    console.log("profile id: ", req.session.id);
+    console.log("profile edit route!!");
     db.editProfileInfo(req.session.id).then(({ rows }) => {
         // console.log("info: ", rows);
         res.render("edit", {
@@ -147,7 +147,12 @@ app.post("/profile/edit", (req, res) => {
                                 "id from update prof: ",
                                 req.session.id
                             );
-                            db.updateUserProfile(age, city, url, req.session.id)
+                            db.updateUserProfile(
+                                age,
+                                city.toLowerCase(),
+                                url.toLowerCase(),
+                                req.session.id
+                            )
                                 .then(() => {
                                     console.log("profile updated");
                                 })
@@ -189,7 +194,7 @@ app.post("/profile/edit", (req, res) => {
 ////////////////////   login routes  ////////////////////
 
 app.get("/login", (req, res) => {
-    console.log("req sign id is: ", req.session.signId);
+    console.log("req sign id is: ", req.session.signed);
     res.render("login", {
         layout: "main",
     });
@@ -224,10 +229,11 @@ app.post("/login", (req, res) => {
 ////////////////////   petition routes  ///////////////////
 
 app.get("/petition", (req, res) => {
-    console.log("req id var: ", req.session.id);
-    if (req.session.signId) {
+    console.log("is signed: : ", req.session.signed);
+
+    if (req.session.signed) {
         console.log("redirected as user has signed");
-        res.redirect("/thanks");
+        // res.redirect("/thanks");
         return;
     } else {
         res.render("petition", {
@@ -239,50 +245,72 @@ app.get("/petition", (req, res) => {
 app.post("/petition", (req, res) => {
     const { signature } = req.body;
     db.addSig(signature, req.session.id)
-        .then((dbEntry) => {
+        .then(() => {
             console.log("signature added to the db");
-            req.session.signId = dbEntry.rows[0].id;
-            console.log("sign id: ", req.session.signId);
-            return;
+            req.session.signed = true;
+            console.log("signed petition is : ", req.session.signed);
+            res.redirect("/thanks");
         })
         .catch((err) => {
             console.log("error in db.addSig", err);
             res.redirect("/petition");
         });
-    res.redirect("/thanks");
 });
 
 ////////////////////   thanks route  ///////////////////
 
 app.get("/thanks", (req, res) => {
-    if (!req.session.signId) {
-        console.log("redirect from /thanks");
-        res.redirect("/petition");
-        return;
-    } else {
-        // console.log("req session id from /thanks query", req.session.id);
+    console.log(
+        "signed petition is at the get req for thanks : ",
+        req.session.signed
+    );
+    if (req.session.signed) {
         db.numSigned()
             .then((num) => {
                 num = num.rows[0].count;
-                db.findById(req.session.signId).then((rows) => {
-                    const sigImg = rows.rows[0].signature;
-                    res.render("thanks", {
-                        layout: "main",
-                        num,
-                        sigImg,
+                db.findById(req.session.id)
+                    .then((rows) => {
+                        const sigImg = rows.rows[0].signature;
+                        res.render("thanks", {
+                            layout: "main",
+                            num,
+                            sigImg,
+                        });
+                    })
+                    .catch((err) => {
+                        console.log("error in find sig: ", err);
                     });
-                });
             })
             .catch((err) => {
                 console.log("error in num signed: ", err);
             });
+    } else {
+        // console.log("req session id from /thanks query", req.session.id);
+        console.log("redirect from /thanks");
+        res.redirect("/petition");
+        return;
     }
+});
+
+app.post("/thanks", (req, res) => {
+    console.log("post req to remove sig received");
+    console.log("signed true?: ", req.session.signed);
+    db.removeSig(req.session.id)
+        .then(() => {
+            console.log("signature removed :(");
+            req.session.signed = false;
+            res.redirect("/petition");
+            return;
+        })
+        .catch((err) => {
+            console.log(err);
+        });
 });
 
 ////////////////////   signers route  ///////////////////
 
 app.get("/signers", (req, res) => {
-    if (typeof req.session.signId != "number") {
+    if (!req.session.signed) {
         res.redirect("/petition");
     } else {
         db.allSigned()
@@ -319,7 +347,7 @@ app.get("/signers/:city", (req, res) => {
 ////////////////////   redirect route  ///////////////////
 
 app.get("/", (req, res) => {
-    res.render("register", {
+    res.render("home", {
         layout: "main",
     });
 });

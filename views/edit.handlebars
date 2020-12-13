@@ -1,20 +1,20 @@
 <h2>Update or remove some of your profile info below</h2>
-<form method="POST">
+<form method="POST" class="form" id="edit-form">
     <p>First name</p>
-    <input type="text" value="{{rows.[0].first}}" name="first" label="" placeholder="first name">
+    <input type="text" class="inputFields" value="{{rows.[0].first}}" name="first" label="" placeholder="first name">
     <p>Last name</p>
-    <input type="text" value="{{rows.[0].last}}" name="last" placeholder="last name">
+    <input type="text" class="inputFields" value="{{rows.[0].last}}" name="last" placeholder="last name">
     <p>Email</p>
-    <input type="text" value="{{rows.[0].email}}" name="email" placeholder="email address">
+    <input type="text" class="inputFields" value="{{rows.[0].email}}" name="email" placeholder="email address">
     <p>Password</p>
-    <input type="password"  name="password" placeholder="password">
+    <input type="password" class="inputFields" name="password" placeholder="password">
     <p>Age</p>
-    <input type="text" value="{{rows.[0].age}}" name="age" placeholder="age">
+    <input type="text" class="inputFields" value="{{rows.[0].age}}" name="age" placeholder="age">
     <p>City</p>
-    <input type="text" value="{{rows.[0].city}}" name="city" placeholder="city">
+    <input type="text" class="inputFields" value="{{rows.[0].city}}" name="city" placeholder="city">
     <p>URL</p>
-    <input type="text" value="{{rows.[0].url}}" name="url" placeholder="url">
+    <input type="text" class="inputFields" value="{{rows.[0].url}}" name="url" placeholder="url">
 
     <input type="hidden" name="_csrf" value="{{csrfToken}}">
-    <button>Submit</button>
+    <button class="button">Submit</button>
 </form>

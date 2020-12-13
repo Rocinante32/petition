@@ -3,11 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    {{!-- <link rel="stylesheet" href="/style.css"> --}}
+    <link rel="stylesheet" href="/style.css">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Monoton&family=Raleway&display=swap&family=Mr+Dafoe&display=swap" rel="stylesheet"> 
+    <link rel="icon" type="image/x-icon" href="/public/favicon.ico">
     <title>Petition Site</title>
 </head>
 <body>
+    <div id="navbar">
+        <div>
+            <a href="/"><p id="title"><span id="title-text">Save</span>Späti Sundays</p></a>
+        </div>
+        <div id="menu">
+            {{!-- <a href="/petition"><p>PETITION</p></a> --}}
+            {{!-- <a href="/signers"><p>SIGNERS</p></a> --}}
+            <a href="/login"><p>LOGIN</p></a>
+            <a href="/register"><p>REGISTER</p></a>
+        </div>
+    </div>
     {{{body}}}
-    <footer>©2020</footer>
+    <footer>©2020 Petitioners</footer>
 </body>
 </html>

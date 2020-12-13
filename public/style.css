@@ -1,0 +1,160 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    /* background-color: black; */
+    /* color: whitesmoke; */
+    font-family: "Raleway", sans-serif;
+    color: whitesmoke;
+}
+
+body {
+    background-color: black;
+}
+
+a {
+    color: inherit;
+    text-decoration: inherit;
+}
+canvas {
+    background-color: #0b111a;
+}
+
+#menu a:hover {
+    text-decoration: underline;
+    /* border: 2px solid white;
+    border-top: none;
+    border-left: none;
+    border-right: none; */
+}
+footer {
+    color: white;
+    z-index: 11;
+    position: fixed;
+    top: 95%;
+}
+
+#navbar {
+    background-color: black;
+    color: white;
+    height: 70px;
+    padding: 0px 20px;
+    position: fixed;
+    width: 100vw;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 10;
+}
+
+#title {
+    font-family: "Monoton", cursive;
+    font-size: 40px;
+    display: inline;
+}
+
+#title-text {
+    font-family: "Mr Dafoe", cursive;
+    transform: rotate(-15deg);
+    display: inline-block;
+    font-size: 60px;
+    margin-right: 7px;
+}
+
+#menu {
+    width: 40%;
+    display: flex;
+    justify-content: flex-end;
+    font-weight: bold;
+    justify-self: center;
+    align-items: center;
+    color: white;
+}
+
+#menu a {
+    margin-right: 20px;
+}
+
+#container {
+    /* z-index: 0; */
+    width: 100vw;
+    /* vertical-align: bottom; */
+    filter: grayscale(0%) brightness(55%);
+    position: absolute;
+    top: 70px;
+}
+
+#container img {
+    object-fit: cover;
+    width: 100%;
+}
+
+.form {
+    color: whitesmoke;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 400px;
+    padding: 40px;
+    transform: translate(-50%, -50%);
+    background: #0b111a;
+    box-sizing: border-box;
+    box-shadow: 0 15px 25px rgba(22, 22, 22, 0.6);
+    border-radius: 10px;
+}
+
+.inputFields {
+    margin: 15px 0;
+    font-size: 16px;
+    padding: 10px;
+    width: 250px;
+    border: 1px solid rgba(10, 180, 180, 1);
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    background: #0b111a;
+    color: whitesmoke;
+    /* outline: none; */
+}
+
+#edit-form {
+    top: 70%;
+}
+
+.button {
+    background-color: rgba(10, 180, 180, 1);
+    border-radius: 6px;
+    border: 1px solid #057fd0;
+    display: inline-block;
+    cursor: pointer;
+    color: lightgray;
+    font-size: 15px;
+    font-weight: bold;
+    padding: 6px 24px;
+    text-decoration: none;
+}
+
+#signBox {
+    /* position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); */
+    background-color: #0b111a;
+}
+
+.center-text {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    height: 80vh;
+    justify-content: space-between;
+}
+
+.center-text button {
+    margin-top: 25px;
+}
+.center-text img {
+    background-color: #0b111a;
+    width: 50%;
+    margin: 0 auto;
+    border-radius: 10px;
+}

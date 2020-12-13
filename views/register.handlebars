@@ -1,12 +1,12 @@
-<form method="POST">
-    <input type="text" name="first" placeholder="first name" required>
+<form method="POST" class="form">
+    <input type="text" class="inputFields" name="first" placeholder="first name" required>
     <br>
-    <input type="text" name="last" placeholder="last name" required>
+    <input type="text" class="inputFields" name="last" placeholder="last name" required>
     <br>
-    <input type="text" name="email" placeholder="email address" required>
+    <input type="text" class="inputFields" name="email" placeholder="email address" required>
     <br>
-    <input type="password" name="password" placeholder="password" required>
+    <input type="password" class="inputFields" name="password" placeholder="password" required>
     <br>
     <input type="hidden" name="_csrf" value="{{csrfToken}}">
-    <button>Submit</button>
+    <button class="button">Submit</button>
 </form>

@@ -46,7 +46,7 @@ module.exports.numSigned = () => {
 };
 
 module.exports.findById = (id) => {
-    const q = "SELECT signature FROM signatures WHERE id = ($1)";
+    const q = "SELECT signature FROM signatures WHERE user_id = ($1)";
     const params = [id];
     return db.query(q, params);
 };
@@ -99,5 +99,11 @@ module.exports.updateUserProfile = (age, city, url, userId) => {
                 ON CONFLICT (user_id)
                 DO UPDATE SET age = $1, city = $2, url = $3 WHERE user_profiles.user_id = $4`;
     const params = [age || null, city || null, url || null, userId];
+    return db.query(q, params);
+};
+
+module.exports.removeSig = (id) => {
+    const q = "DELETE FROM signatures WHERE user_id = ($1)";
+    const params = [id];
     return db.query(q, params);
 };
